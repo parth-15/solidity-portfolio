@@ -1,12 +1,14 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.9;
+pragma solidity 0.8.9;
+
+import "./Project.sol";
 
 contract ProjectFactory {
-    event ProjectCreated(address newProject); // Note: you should add additional data fields in this event
+    event ProjectCreated(address indexed creator, address indexed project, uint256 amountToRaise);
 
-    function create() external {
-        // TODO: implement me!
-
-        emit ProjectCreated(address(0x0)); // TODO: replace me with the actual Project's address
+    function create(uint256 amountToRaise, string calldata name, string calldata symbol) external {
+        
+        Project project = new Project(msg.sender, amountToRaise, name, symbol);
+        emit ProjectCreated(msg.sender, address(project), amountToRaise);
     }
 }
