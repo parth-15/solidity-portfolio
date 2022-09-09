@@ -8,9 +8,6 @@ contract Project is ERC721 {
     uint256 public immutable AMOUNT_TO_RAISE;
     address public immutable CREATOR;
     uint256 public immutable ROUND_END_TIME;
-    Status public status;
-    mapping(address => uint256) public badgesGiven;
-    mapping(address => uint256) public contributions;
     uint256 public contractBalance;
     uint256 public tokenId;
 
@@ -40,6 +37,9 @@ contract Project is ERC721 {
         Completed,
         Failed
     }
+    Status public status;
+    mapping(address => uint256) public badgesGiven;
+    mapping(address => uint256) public contributions;
 
     constructor(
         address creator_,
@@ -53,12 +53,6 @@ contract Project is ERC721 {
         CREATOR = creator_;
         AMOUNT_TO_RAISE = amountToRaise_;
         ROUND_END_TIME = block.timestamp + ROUND_DURATION;
-    }
-
-    function _setStatusToComplete() internal {
-        require(status == Status.Active, "Invalid state transition");
-        status = Status.Completed;
-        emit ProjectCompleted(block.timestamp);
     }
 
     function contribute() external payable onlyActive {
@@ -115,5 +109,11 @@ contract Project is ERC721 {
 
         (bool success, ) = payable(CREATOR).call{value: amount}("");
         require(success, "Call failed");
+    }
+
+    function _setStatusToComplete() internal {
+        require(status == Status.Active, "Invalid state transition");
+        status = Status.Completed;
+        emit ProjectCompleted(block.timestamp);
     }
 }
