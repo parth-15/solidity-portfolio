@@ -4,7 +4,6 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract Project is ERC721 {
-    
     uint256 public constant ROUND_DURATION = 30 days;
     uint256 public immutable AMOUNT_TO_RAISE;
     address public immutable CREATOR;
@@ -35,14 +34,19 @@ contract Project is ERC721 {
         require(block.timestamp < ROUND_END_TIME, "Round ended");
         _;
     }
-    
+
     enum Status {
         Active,
         Completed,
         Failed
     }
 
-    constructor(address creator_, uint256 amountToRaise_, string memory name_, string memory symbol_) ERC721(name_, symbol_) {
+    constructor(
+        address creator_,
+        uint256 amountToRaise_,
+        string memory name_,
+        string memory symbol_
+    ) ERC721(name_, symbol_) {
         require(creator_ != address(0), "Invalid address");
         require(amountToRaise_ >= 0.01 ether, "Invalid amount");
         status = Status.Active;
@@ -67,28 +71,30 @@ contract Project is ERC721 {
         contributions[msg.sender] += msg.value;
         contractBalance += msg.value;
 
-        uint256 badgesToGive = (contributions[msg.sender]/(1 ether)) - badgesGiven[msg.sender]; 
+        uint256 badgesToGive = (contributions[msg.sender] / (1 ether)) -
+            badgesGiven[msg.sender];
 
         badgesGiven[msg.sender] += badgesToGive;
 
         emit ContributionReceived(msg.sender, msg.value);
 
-       for(uint256 i = 0; i < badgesToGive; i++) {
+        for (uint256 i = 0; i < badgesToGive; i++) {
             _safeMint(msg.sender, tokenId++);
         }
-
     }
 
     function cancelProject() external onlyCreator onlyActive {
         status = Status.Failed;
         emit ProjectCanceled(block.timestamp);
     }
-    //check this requires properly
+
     function claimContributions() external {
+        if (status == Status.Active && block.timestamp > ROUND_END_TIME) {
+            status = Status.Failed;
+        }
+
         require(contributions[msg.sender] > 0, "No contribution");
-        require(status != Status.Completed, "Project completed");
-        require(status == Status.Failed
-        || (block.timestamp > ROUND_END_TIME && status == Status.Active), "Project active or not failed");
+        require(status == Status.Failed, "Project active or completed");
         uint256 amount = contributions[msg.sender];
         require(contractBalance < AMOUNT_TO_RAISE, "Goal met");
         contractBalance -= amount;
