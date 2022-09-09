@@ -68,6 +68,19 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 <!-- You can see how to generate a coverage report in the "Solidity Code Coverage" section located here: -->
 <!-- https://learn.0xmacro.com/training/project-crowdfund/p/4 -->
 
+```
+---------------------|----------|----------|----------|----------|----------------|
+File                 |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+---------------------|----------|----------|----------|----------|----------------|
+ contracts/          |      100 |       90 |      100 |      100 |                |
+  Project.sol        |      100 |       90 |      100 |      100 |                |
+  ProjectFactory.sol |      100 |      100 |      100 |      100 |                |
+ contracts/test/     |      100 |      100 |      100 |      100 |                |
+  Attack.sol         |      100 |      100 |      100 |      100 |                |
+---------------------|----------|----------|----------|----------|----------------|
+All files            |      100 |    90.48 |      100 |      100 |                |
+---------------------|----------|----------|----------|----------|----------------|
+```
 
 ## Design Exercise Answer
 <!-- Answer the Design Exercise. -->
