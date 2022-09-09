@@ -106,6 +106,11 @@ From the OpenZeppelin implementation,
 ```
 For each non-fungible token(distinct token ids), there can be multiple address holding multiple tokens of the same type.
 
+## Some Notable Points
+- `contractBalance` is used to track contributions received by the contract instead of `address(this).balance` so that ETH contributed without calling function is not accounted. Also, force-fed contribution to the contract is not taken into consideration.
+- Code layout is organized as per this article. https://medium.com/coinmonks/solidity-fundamentals-88ceb4873064
+
+
 ## Useful Commands
 
 Try running some of the following commands:
