@@ -757,20 +757,17 @@ describe("Crowdfundr", () => {
             project,
             "ProjectCanceled"
           );
+          // .withArgs(
+          //   (
+          //     await ethers.provider.getBlock(
+          //       await ethers.provider.getBlockNumber()
+          //     )
+          //   ).timestamp
+          // );
         });
       });
 
       describe("NFT Contributor Badges", () => {
-        beforeEach(async () => {
-          await project
-            .connect(deployer)
-            .contribute({ value: ethers.utils.parseEther("1") });
-
-          await project
-            .connect(alice)
-            .contribute({ value: ethers.utils.parseEther("2") });
-        });
-
         it("Awards a contributor with a badge when they make a single contribution of at least 1 ETH", async () => {
           await project
             .connect(bob)
@@ -823,6 +820,16 @@ describe("Crowdfundr", () => {
             .connect(bob)
             .contribute({ value: ethers.utils.parseEther("1.2") });
           expect(await project.balanceOf(bob.address)).to.be.equal(2);
+
+          await project
+            .connect(bob)
+            .contribute({ value: ethers.utils.parseEther("1") });
+          expect(await project.balanceOf(bob.address)).to.be.equal(3);
+
+          await project
+            .connect(bob)
+            .contribute({ value: ethers.utils.parseEther("0.8") });
+          expect(await project.balanceOf(bob.address)).to.be.equal(4);
         });
 
         it("Does not award a contributor with a second badge if their total contribution to a single project is > 1 ETH but < 2 ETH", async () => {
@@ -866,6 +873,9 @@ describe("Crowdfundr", () => {
         });
 
         it("Allows contributor badge holders to trade the NFT to another address", async () => {
+          await project
+            .connect(deployer)
+            .contribute({ value: ethers.utils.parseEther("1") });
           const tokenId = await project.tokenId();
           await project
             .connect(bob)
@@ -880,6 +890,10 @@ describe("Crowdfundr", () => {
         });
 
         it("Allows contributor badge holders to trade the NFT to another address even after its related project fails", async () => {
+          await project
+            .connect(deployer)
+            .contribute({ value: ethers.utils.parseEther("1") });
+
           const tokenId = await project.tokenId();
           await project
             .connect(bob)
