@@ -753,17 +753,14 @@ describe("Crowdfundr", () => {
         });
 
         it('Emits a "ProjectCanceled" event after a project is canceled by the creator', async () => {
-          await expect(project.connect(deployer).cancelProject()).to.be.emit(
-            project,
-            "ProjectCanceled"
+          const tx = await project.connect(deployer).cancelProject();
+          const blockNum: any = tx.blockNumber;
+          const minedTx = await tx?.wait();
+          expect(minedTx.events![0].args![0]).to.equal(
+            await (
+              await ethers.provider.getBlock(blockNum)
+            ).timestamp
           );
-          // .withArgs(
-          //   (
-          //     await ethers.provider.getBlock(
-          //       await ethers.provider.getBlockNumber()
-          //     )
-          //   ).timestamp
-          // );
         });
       });
 
