@@ -19,6 +19,12 @@ module.exports = {
   },
   rules: {
     "node/no-unpublished-import": "off",
+    "node/no-missing-import": [
+      "error",
+      {
+        tryExtensions: [".ts", ".js", ".json", ".node"],
+      },
+    ],
     "node/no-unsupported-features/es-syntax": [
       "error",
       { ignores: ["modules"] },
