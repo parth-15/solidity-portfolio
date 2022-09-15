@@ -38,7 +38,6 @@ contract SpaceCoin is ERC20 {
         emit TransferTaxSet(isTransferTaxEnabled);
     }
 
-    //@audit-info check this with melville
     function _transfer(
         address from,
         address recipient,
@@ -51,10 +50,7 @@ contract SpaceCoin is ERC20 {
                 amountToRecipient -
                 (amount * TRANSFER_TAX_PERCENT) /
                 100;
-            amountToTreasury =
-                amountToTreasury +
-                (amount * TRANSFER_TAX_PERCENT) /
-                100;
+            amountToTreasury = (amount * TRANSFER_TAX_PERCENT) / 100;
             super._transfer(from, TREASURY, amountToTreasury);
         }
         super._transfer(from, recipient, amountToRecipient);

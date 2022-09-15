@@ -81,7 +81,6 @@ contract ICO {
         emit FundRaisingAndSpcRedemptionResumed();
     }
 
-    //@audit-info
     function advancePhase(uint8 newPhase) external onlyOwner {
         require(currentPhase != Phase.OPEN, "can't advance phase after open");
         require(newPhase <= uint8(Phase.OPEN), "invalid phase");
@@ -161,7 +160,6 @@ contract ICO {
         }
     }
 
-    //@audit-info should add to or not
     function redeemToken() external isFundRaisingAndSpcRedemptionActive {
         require(
             currentPhase == Phase.OPEN,
