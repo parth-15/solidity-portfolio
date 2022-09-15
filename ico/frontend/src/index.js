@@ -1,15 +1,15 @@
-import { ethers } from "ethers"
-// import IcoJSON from '../../artifacts/contracts/Ico.sol/Ico.json';
-// import SpaceCoinJSON from '../../artifacts/contracts/SpaceCoin.sol/SpaceCoin.json';
+import { BigNumber, ethers } from "ethers"
+import IcoJSON from '../../artifacts/contracts/Ico.sol/Ico.json';
+import SpaceCoinJSON from '../../artifacts/contracts/SpaceCoin.sol/SpaceCoin.json';
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
 
-// const icoAddr = '0xb0385916a6422ba9058A77C4CdE228E5b322EC35';
-// const icoContract = new ethers.Contract(icoAddr, IcoJSON.abi, provider);
+const icoAddr = '0xc8FE4daE6b7dcB33F1302891DfaB66Fa2f3cA9f3';
+const icoContract = new ethers.Contract(icoAddr, IcoJSON.abi, provider);
 
-// const spaceCoinAddr = '0x123b31a295a7eE3b6b49f193f2543eC5405813D6';
-// const spaceCoinContract = new ethers.Contract(spaceCoinAddr, SpaceCoinJSON.abi, provider);
+const spaceCoinAddr = '0x35f0DeC22F941213ADEc52a55Cccb0dded04Ec0F';
+const spaceCoinContract = new ethers.Contract(spaceCoinAddr, SpaceCoinJSON.abi, provider);
 
 async function connectToMetamask() {
   try {
@@ -21,19 +21,22 @@ async function connectToMetamask() {
   }
 }
 
+connectToMetamask();
+
 
 ico_spc_buy.addEventListener('submit', async e => {
   e.preventDefault()
   const form = e.target
   const eth = ethers.utils.parseEther(form.eth.value)
-  console.log("Buying", eth, "eth")
-
+  console.log("buying", eth)
   await connectToMetamask()
-  // TODO: Call icoContract.contribute function (very similar to your test code!)
 
-  // TODO: update the displayed amount of SPC that is left to be claimed
-  ico_spc_left.innerHTML = "42" // TODO: this is not the correct value, update it!
-  ico_spc_earned.innerHTML = "42" // TODO: this is not the correct value, update it!
-
-  // TODO: update the ico_error HTML element if an error occurs
+  try {
+    const unconfirmedTx = await icoContract.connect(signer).contribute({value: eth})
+    await unconfirmedTx.wait();
+    ico_spc_left.innerHTML = ethers.utils.formatEther(ethers.utils.parseEther("150000").sub(BigNumber.from(await icoContract.currentTotalContribution()).mul(5))) 
+    ico_spc_earned.innerHTML = ethers.utils.formatEther((BigNumber.from(await icoContract.contributions(await signer.getAddress())).mul(5)).sub(await icoContract.tokenReedemed(await signer.getAddress())))
+  } catch (err) {
+    ico_error.innerHTML = err.message;
+  }
 })
