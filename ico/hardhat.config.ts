@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-etherscan";
 
 dotenv.config();
 
@@ -18,11 +19,11 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.9',
+    version: "0.8.9",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 200,
       },
     },
   },
@@ -34,7 +35,7 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       accounts: {
-        count: 20,
+        count: 50,
         accountsBalance: "10000000000000000000000", // 10ETH (Default)
       },
     },
