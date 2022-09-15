@@ -17,7 +17,7 @@ contract ICO {
     address public immutable SPC_TOKEN_ADDRESS;
     uint256 public currentTotalContribution;
     bool public isFundraisingAndSpcRedemptionPaused = false;
-    Phase public currentPhase;
+    Phase public currentPhase = Phase.SEED;
     mapping(address => bool) public isPrivateContributor;
     mapping(address => uint256) public tokenReedemed;
     mapping(address => uint256) public contributions;
