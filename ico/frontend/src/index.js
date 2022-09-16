@@ -36,7 +36,8 @@ ico_spc_buy.addEventListener('submit', async e => {
     await unconfirmedTx.wait();
     ico_spc_left.innerHTML = ethers.utils.formatEther(ethers.utils.parseEther("150000").sub(BigNumber.from(await icoContract.currentTotalContribution()).mul(5))) 
     ico_spc_earned.innerHTML = ethers.utils.formatEther((BigNumber.from(await icoContract.contributions(await signer.getAddress())).mul(5)).sub(await icoContract.tokenReedemed(await signer.getAddress())))
+    ico_error.innerHTML = "";
   } catch (err) {
-    ico_error.innerHTML = err.message;
+    ico_error.innerHTML = err.reason;
   }
 })
