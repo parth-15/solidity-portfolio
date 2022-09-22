@@ -109,17 +109,6 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 
 
 
-
-
-
-### Proposal System Spec
-
-* Example: Two or more identical proposals may not be active at the same
-
-### Voting System Spec
-
-* Example: 25% Quorum, where quorum is defined as _____.
-
 ## Code Coverage Report
 <!-- Copy + paste your coverage report here before submitting your project -->
 <!-- You can see how to generate a coverage report in the "Solidity Code Coverage" section located here: -->
