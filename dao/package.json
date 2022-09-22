@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "test": "nodemon -x npx hardhat test --parallel -w contracts -w test -e js,ts,sol",
+    "coverage": "nodemon -x npx hardhat coverage -w contracts -w test -e js,ts,sol",
+    "prettier": "prettier '**/*.{json,sol,md}' --write",
+    "lint": "eslint contracts/* test/*",
+    "lint-fix": "eslint --fix contracts/* test/*"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
