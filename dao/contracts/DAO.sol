@@ -8,9 +8,9 @@ contract DAO {
     uint256 public constant MEMBERSHIP_FEE = 1 ether;
     uint256 public constant EXECUTION_REWARDS = 0.01 ether;
     uint256 public constant VOTING_PERIOD = 7 days;
-    mapping(address => bool) public isMember;
     uint256 public currentMembers;
     uint256 public proposalCounterId;
+    mapping(address => bool) public isMember;
     mapping(uint256 => Proposal) public proposals;
     mapping(address => uint256) public membershipCreationTime;
     mapping(address => mapping(uint256 => bool)) public hasVoted;
@@ -24,6 +24,16 @@ contract DAO {
     bytes32 public constant BALLOT_TYPEHASH =
         keccak256("Ballot(uint256 proposalId,bool support)");
 
+    event VoteCasted(
+        address indexed caster,
+        uint256 indexed proposalId,
+        bool support
+    );
+    event ProposalCreated(uint256 proposalId, uint256 nonce);
+    event ProposalExecuted(uint256 proposalId);
+    event MemberCreated(address member);
+    event NftPurchased(address indexed nftContract, uint256 nftId);
+
     struct Proposal {
         uint256 nonce;
         uint256 startTime;
@@ -36,7 +46,6 @@ contract DAO {
     }
 
     constructor() {
-        currentMembers = 0;
         proposalCounterId = 1;
     }
 
@@ -309,19 +318,6 @@ contract DAO {
         }
     }
 
-    function isProposalPassed(uint256 proposalId) private view returns (bool) {
-        Proposal storage proposal = proposals[proposalId];
-        uint256 memberVoted = proposal.yesVotes + proposal.noVotes;
-        uint256 totalMembersAtTimeOfCreation = proposal
-            .totalMembersAtTimeOfCreation;
-        return
-            proposal.nonce >= 1 &&
-            proposal.nonce < proposalCounterId &&
-            block.timestamp > proposal.endTime &&
-            proposal.yesVotes > proposal.noVotes &&
-            (4 * memberVoted) >= totalMembersAtTimeOfCreation;
-    }
-
     function hashProposal(
         address[] memory targets,
         uint256[] memory values,
@@ -345,14 +341,6 @@ contract DAO {
         currentMembers++;
 
         emit MemberCreated(msg.sender);
-    }
-
-    function getChainId() public view returns (uint) {
-        uint chainId;
-        assembly {
-            chainId := chainid()
-        }
-        return chainId;
     }
 
     function buyNFTFromMarketplace(
@@ -385,22 +373,33 @@ contract DAO {
         address,
         uint256,
         bytes calldata
-    ) external pure returns (bytes4) {
+    ) public pure returns (bytes4) {
         return
             bytes4(
                 keccak256("onERC721Received(address,address,uint256,bytes)")
             );
     }
 
-    event VoteCasted(
-        address indexed caster,
-        uint256 indexed proposalId,
-        bool support
-    );
-    event ProposalCreated(uint256 proposalId, uint256 nonce);
-    event ProposalExecuted(uint256 proposalId);
-    event MemberCreated(address member);
-    event NftPurchased(address indexed nftContract, uint256 nftId);
+    function getChainId() public view returns (uint256) {
+        uint chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
+
+    function isProposalPassed(uint256 proposalId) private view returns (bool) {
+        Proposal storage proposal = proposals[proposalId];
+        uint256 memberVoted = proposal.yesVotes + proposal.noVotes;
+        uint256 totalMembersAtTimeOfCreation = proposal
+            .totalMembersAtTimeOfCreation;
+        return
+            proposal.nonce >= 1 &&
+            proposal.nonce < proposalCounterId &&
+            block.timestamp > proposal.endTime &&
+            proposal.yesVotes > proposal.noVotes &&
+            (4 * memberVoted) >= totalMembersAtTimeOfCreation;
+    }
 
     error SignatureVerificationBatchFailed(uint256 index, uint256 proposalId);
     error InvalidArguments(string reason);

@@ -12,12 +12,6 @@ contract DAOHelper {
     bytes32 public constant BALLOT_TYPEHASH =
         keccak256("Ballot(uint256 proposalId,bool support)");
 
-    constructor(address _dao) {
-        // currentMembers = 0;
-        // proposalCounterId = 1;
-        // dao = DAO(_dao);
-    }
-
     function hashProposal(
         address[] memory targets,
         uint256[] memory values,

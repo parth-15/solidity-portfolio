@@ -4,8 +4,6 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./INftMarketplace.sol";
 
-//@audit-info show this contract
-
 contract MockNftMarketplace is INftMarketplace, ERC721 {
     constructor() ERC721("Some NFT", "NFT") {
         for (uint256 i = 0; i < 20; i++) {

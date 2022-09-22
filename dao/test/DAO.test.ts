@@ -63,9 +63,9 @@ describe("DAO", () => {
       "MockNftMarketplace"
     );
     const dao: DAO = (await DAO.connect(deployer).deploy()) as DAO;
-    const daoHelper: DAOHelper = (await DAOHelper.connect(deployer).deploy(
-      dao.address
-    )) as DAOHelper;
+    const daoHelper: DAOHelper = (await DAOHelper.connect(
+      deployer
+    ).deploy()) as DAOHelper;
     const mockNftMarketplace: MockNftMarketplace =
       (await MockNftMarketplace.connect(
         deployer
