@@ -3,15 +3,11 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./INftMarketplace.sol";
-import "hardhat/console.sol";
 
 //@audit-info show this contract
 
 contract MockNftMarketplace is INftMarketplace, ERC721 {
     constructor() ERC721("Some NFT", "NFT") {
-        // TODO: perform any setup of storage variables you want here.
-        // You'll likely want to mint some NFTs so you can transfer them
-        // when an address calls MockNftMarketplace.buy
         for (uint256 i = 0; i < 20; i++) {
             _mint(address(this), i);
         }
@@ -24,7 +20,6 @@ contract MockNftMarketplace is INftMarketplace, ERC721 {
         override
         returns (uint256 price)
     {
-        console.log("in getprice", "----------");
         if (nftContract != address(this)) {
             revert IncorrectNftContract(nftContract);
         }
@@ -56,9 +51,6 @@ contract MockNftMarketplace is INftMarketplace, ERC721 {
 
         this.safeTransferFrom(address(this), msg.sender, nftId);
 
-        // Our MockNftMarketplace's return value isn't useful, since
-        // there is no way for MockNftMarketplace.buy to return `false`. However,
-        // we still need to adhere to the interface, so we return true anyway.
         return true;
     }
 

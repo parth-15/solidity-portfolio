@@ -2,15 +2,6 @@
 pragma solidity ^0.8.9;
 
 import "./INftMarketplace.sol";
-import "hardhat/console.sol";
-
-//Take care of hash collision in proposal data
-// member should not be able to vote twice or proposal before start time or after endtime
-// replay protection in signatures
-// check what if proposal doesn't exist
-//confirm the rounding part
-// DAO contract should be able to receive NFTs
-// Critical: Should we add owner to typehash parameter and is there any need for deadline
 
 contract DAO {
     string public constant name = "Macro Dao Governance";
@@ -33,15 +24,14 @@ contract DAO {
     bytes32 public constant BALLOT_TYPEHASH =
         keccak256("Ballot(uint256 proposalId,bool support)");
 
-    //TODO @audit-info pack this struct. also should add ID to this
     struct Proposal {
         uint256 nonce;
         uint256 startTime;
         uint256 endTime;
-        address creator;
         uint256 yesVotes;
         uint256 noVotes;
         uint256 totalMembersAtTimeOfCreation;
+        address creator;
         bool executed;
     }
 
@@ -181,9 +171,6 @@ contract DAO {
         emit VoteCasted(signer, proposalId, support);
     }
 
-    /*
-        Shouldn't able to vote non existent proposal
-    */
     function vote(uint256 proposalId, bool support) external {
         if (!isMember[msg.sender]) {
             revert NotMember();
@@ -229,7 +216,7 @@ contract DAO {
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas
-    ) external returns (uint256) {
+    ) external returns (uint256, uint256) {
         if (!isMember[msg.sender]) {
             revert NotMember();
         }
@@ -264,11 +251,9 @@ contract DAO {
 
         emit ProposalCreated(proposalId, proposal.nonce);
 
-        return proposalId;
+        return (proposalId, proposal.nonce);
     }
 
-    //@audit-info is it needed to pass proposalId here. I guess it is necessary
-    //use check effect interaction pattern here
     function executeProposal(
         uint256 proposalId,
         uint256 originalNonce,
@@ -324,20 +309,17 @@ contract DAO {
         }
     }
 
-    //@audit-info it is rounding down in quorum
     function isProposalPassed(uint256 proposalId) private view returns (bool) {
         Proposal storage proposal = proposals[proposalId];
         uint256 memberVoted = proposal.yesVotes + proposal.noVotes;
         uint256 totalMembersAtTimeOfCreation = proposal
             .totalMembersAtTimeOfCreation;
-        uint256 requiredVotedMembers = (totalMembersAtTimeOfCreation * 25) /
-            100;
         return
             proposal.nonce >= 1 &&
             proposal.nonce < proposalCounterId &&
             block.timestamp > proposal.endTime &&
             proposal.yesVotes > proposal.noVotes &&
-            memberVoted >= requiredVotedMembers; //critical : should this be strict here
+            (4 * memberVoted) >= totalMembersAtTimeOfCreation;
     }
 
     function hashProposal(
@@ -365,7 +347,6 @@ contract DAO {
         emit MemberCreated(msg.sender);
     }
 
-    //@audit-info can this function be public
     function getChainId() public view returns (uint) {
         uint chainId;
         assembly {
@@ -374,20 +355,15 @@ contract DAO {
         return chainId;
     }
 
-    //Critical to make it private or add modifier
-    //TODO: check price and send ether accordinglys
-    //TODO: check how can we utilize maxPrice properly
     function buyNFTFromMarketplace(
         INftMarketplace marketplace,
         address nftContract,
         uint256 nftId,
         uint256 maxPrice
     ) external {
-        console.log("---------------", "in buyNFTMarketplace");
         if (msg.sender != address(this)) {
             revert InvalidCaller();
         }
-        console.log("---------------", "condition satisfied");
 
         uint256 nftPrice = marketplace.getPrice(nftContract, nftId);
 
@@ -399,10 +375,9 @@ contract DAO {
             revert InvalidArguments("Price of nft too high");
         }
 
-        //@audit-info should we pass all ether here
-        marketplace.buy{value: nftPrice}(nftContract, nftId);
-
         emit NftPurchased(nftContract, nftId);
+
+        marketplace.buy{value: nftPrice}(nftContract, nftId);
     }
 
     function onERC721Received(
@@ -410,7 +385,7 @@ contract DAO {
         address,
         uint256,
         bytes calldata
-    ) external returns (bytes4) {
+    ) external pure returns (bytes4) {
         return
             bytes4(
                 keccak256("onERC721Received(address,address,uint256,bytes)")
@@ -422,7 +397,6 @@ contract DAO {
         uint256 indexed proposalId,
         bool support
     );
-
     event ProposalCreated(uint256 proposalId, uint256 nonce);
     event ProposalExecuted(uint256 proposalId);
     event MemberCreated(address member);
