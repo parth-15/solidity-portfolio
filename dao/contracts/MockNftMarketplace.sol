@@ -3,18 +3,18 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./INftMarketplace.sol";
+import "hardhat/console.sol";
 
-contract MockNftMarketplace is INftMarketplace {
-    /// @notice The NFT contract we'll use for testing. This NFTs token will be transfered
-    /// after a successful call to MockNftMarketplace.buy
-    ERC721 public someNFT;
+//@audit-info show this contract
 
-    constructor() {
-        someNFT = new ERC721("Some NFT", "NFT");
-
+contract MockNftMarketplace is INftMarketplace, ERC721 {
+    constructor() ERC721("Some NFT", "NFT") {
         // TODO: perform any setup of storage variables you want here.
         // You'll likely want to mint some NFTs so you can transfer them
         // when an address calls MockNftMarketplace.buy
+        for (uint256 i = 0; i < 20; i++) {
+            _mint(address(this), i);
+        }
     }
 
     /// @inheritdoc INftMarketplace
@@ -24,7 +24,16 @@ contract MockNftMarketplace is INftMarketplace {
         override
         returns (uint256 price)
     {
-        // TODO: return some reasonable price value here
+        console.log("in getprice", "----------");
+        if (nftContract != address(this)) {
+            revert IncorrectNftContract(nftContract);
+        }
+
+        if (nftId < 20) {
+            price = 0.01 ether;
+        } else {
+            price = 1000000 ether;
+        }
     }
 
     /// @inheritdoc INftMarketplace
@@ -37,7 +46,7 @@ contract MockNftMarketplace is INftMarketplace {
         // MockNftMarketplace only has a single NFT for addresses to buy
         // so let's ensure the caller is specifying the only correct NFT
         // contract
-        if (nftContract != address(someNFT)) {
+        if (nftContract != address(this)) {
             revert IncorrectNftContract(nftContract);
         }
 
@@ -45,7 +54,7 @@ contract MockNftMarketplace is INftMarketplace {
             revert InsufficientFunds(msg.value, getPrice(nftContract, nftId));
         }
 
-        someNFT.safeTransferFrom(address(this), msg.sender, nftId);
+        this.safeTransferFrom(address(this), msg.sender, nftId);
 
         // Our MockNftMarketplace's return value isn't useful, since
         // there is no way for MockNftMarketplace.buy to return `false`. However,
