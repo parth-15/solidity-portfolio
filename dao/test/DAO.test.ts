@@ -667,6 +667,9 @@ describe("DAO", () => {
           )
       ).to.be.ok;
 
+      expect(await mockNftMarketplace.balanceOf(dao.address)).equal(1);
+      expect(await mockNftMarketplace.ownerOf(0)).to.equal(dao.address);
+
       await expect(
         dao.connect(sam).vote(proposalId, true)
       ).to.be.revertedWithCustomError(dao, "ProposalNotActive");
@@ -1494,6 +1497,9 @@ describe("DAO", () => {
             [...randomCalldatas, callData]
           )
       ).to.be.ok;
+
+      expect(await mockNftMarketplace.balanceOf(dao.address)).equal(1);
+      expect(await mockNftMarketplace.ownerOf(1)).to.equal(dao.address);
     });
 
     it("Reverts if 25% quorum is not reached", async () => {
