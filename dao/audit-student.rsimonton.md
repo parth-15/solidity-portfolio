@@ -86,20 +86,20 @@ if (proposal.executed) {
   Lines 51-52 and 270-275 contain:
 
 ```
-	/// @dev auto-incrementing id stored in each proposal for unique identifier
-    proposalCounterId = 1;
-    
-    ...
-    
-    uint256 proposalId = hashProposal(
-        targets,
-        values,
-        calldatas,
-        proposalCounterId
-    );
+/// @dev auto-incrementing id stored in each proposal for unique identifier
+proposalCounterId = 1;
+
+...
+
+uint256 proposalId = hashProposal(
+    targets,
+    values,
+    calldatas,
+    proposalCounterId
+);
 ```
 
-  You can remove the initializer altogether (and subsequently your constructor as well!) by changing line `274` to simply: `++proposalCounterId` (if you did so you'd also need to change line `277` to: `proposal.nonce = proposalCounterId++;`
+  You can remove the initializer altogether (and subsequently your constructor as well!) by changing line `274` to simply: `++proposalCounterId` (if you did so you'd also need to change line `277` to: `proposal.nonce = proposalCounterId;` (don't increment)
 
 ## [Q-5] Duplicated logic in castBulkVotesBySignature
 
