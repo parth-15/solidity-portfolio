@@ -106,6 +106,7 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 
 - A standardized NFT-buying function called `buyNFTFromMarketplace` should exist on the DAO contract so that DAO members can include it as one of the proposed arbitrary function calls on routine NFT purchase proposals.
 - Even though this DAO has one main purpose (collecting NFTs), the proposal system should support proposing the execution of any arbitrarily defined functions on any contract.
+- Only source of funds for DAO is membership fees. So, there is not any `receive` function in the contract.
 
 
 

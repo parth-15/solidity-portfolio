@@ -3,6 +3,8 @@ pragma solidity ^0.8.9;
 
 import "./INftMarketplace.sol";
 
+/// @title DAO Project
+/// @author Parth Patel
 contract DAO {
     string public constant name = "Macro Dao Governance";
     uint256 public constant MEMBERSHIP_FEE = 1 ether;
@@ -46,9 +48,17 @@ contract DAO {
     }
 
     constructor() {
+        /// @dev auto-incrementing id stored in each proposal for unique identifier
         proposalCounterId = 1;
     }
 
+    /// @notice casts vote in bulk using signatures
+    /// @dev if one signature is wrong, no votes will be processed
+    /// @param proposalId array of all proposal id to vote on
+    /// @param support boolean array for whether give yes vote or no vote
+    /// @param v parameter for signature
+    /// @param r parameter for signature
+    /// @param s parameter for signature
     function castBulkVoteBySignature(
         uint256[] memory proposalId,
         bool[] memory support,
@@ -120,6 +130,13 @@ contract DAO {
         }
     }
 
+    /// @notice casts single vote using signatures
+    /// @dev if signature is wrong, vote will not be processed
+    /// @param proposalId proposal id to vote on
+    /// @param support for whether give yes vote or no vote
+    /// @param v parameter for signature
+    /// @param r parameter for signature
+    /// @param s parameter for signature
     function castVoteBySignature(
         uint256 proposalId,
         bool support,
@@ -180,6 +197,9 @@ contract DAO {
         emit VoteCasted(signer, proposalId, support);
     }
 
+    /// @notice casts single vote directly
+    /// @param proposalId proposal id to vote on
+    /// @param support for whether give yes vote or no vote
     function vote(uint256 proposalId, bool support) external {
         if (!isMember[msg.sender]) {
             revert NotMember();
@@ -221,6 +241,11 @@ contract DAO {
         emit VoteCasted(msg.sender, proposalId, support);
     }
 
+    /// @notice proposes a proposal with set of functions
+    /// @dev all the arguments array should be of same lengths
+    /// @param targets addresses of contract
+    /// @param values ETH to sent to those contract
+    /// @param calldatas to sent to each contract
     function propose(
         address[] memory targets,
         uint256[] memory values,
@@ -263,6 +288,13 @@ contract DAO {
         return (proposalId, proposal.nonce);
     }
 
+    /// @notice executes a proposal with set of functions
+    /// @dev all the arguments array should be of same lengths
+    /// @param proposalId id of proposal to execute
+    /// @param originalNonce nonce of proposal to execute
+    /// @param targets addresses of contract
+    /// @param values ETH to sent to those contract
+    /// @param calldatas to sent to each contract
     function executeProposal(
         uint256 proposalId,
         uint256 originalNonce,
@@ -318,16 +350,8 @@ contract DAO {
         }
     }
 
-    function hashProposal(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        uint256 nonce
-    ) private pure returns (uint256) {
-        return
-            uint256(keccak256(abi.encode(targets, values, calldatas, nonce)));
-    }
-
+    /// @notice allows to buy membership
+    /// @dev fee is 1 ETH
     function buyMembership() external payable {
         if (msg.value != MEMBERSHIP_FEE) {
             revert InvalidFee();
@@ -343,6 +367,12 @@ contract DAO {
         emit MemberCreated(msg.sender);
     }
 
+    /// @notice buys an NFT from marketplace
+    /// @dev vulnerable to front-running attacks
+    /// @param marketplace to buy nft from
+    /// @param nftContract to buy nft from
+    /// @param nftId of nft
+    /// @param maxPrice allowed to purchase NFT
     function buyNFTFromMarketplace(
         INftMarketplace marketplace,
         address nftContract,
@@ -368,6 +398,7 @@ contract DAO {
         marketplace.buy{value: nftPrice}(nftContract, nftId);
     }
 
+    /// @notice functionality for the contract to handle NFTs
     function onERC721Received(
         address,
         address,
@@ -380,12 +411,24 @@ contract DAO {
             );
     }
 
+    /// @notice get chain id of the chain
+    /// @return chain id
     function getChainId() public view returns (uint256) {
         uint chainId;
         assembly {
             chainId := chainid()
         }
         return chainId;
+    }
+
+    function hashProposal(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        uint256 nonce
+    ) private pure returns (uint256) {
+        return
+            uint256(keccak256(abi.encode(targets, values, calldatas, nonce)));
     }
 
     function isProposalPassed(uint256 proposalId) private view returns (bool) {
