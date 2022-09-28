@@ -22,11 +22,6 @@ Consider to check if the external call was success:
 bool success = marketplace.buy{value: nftPrice}( nftContract, nftId ); require(success, "NFT_BUY_FAILED");
 ```
 
-## **[L-2]** Users who purchase membership before proposal proposed in same block are unable to vote on it
-The project spec states: "DAO members who join after a proposal is created should not be able to vote on that proposal." DAO.sol doesn't implement this. Instead the code requires that a member needed to have purchased a membership at least the *block* before instead of just a transaction before. This is due to how DAO.sol uses the `block.timestamp` for both membership joining and proposal creation with the comparison `membershipCreationTime[signer] > proposal.startTime`. This logic will prevent a user who joined the transaction before a proposal in the same block from being able to vote on that proposal. 
-
-Consider: keeping track of the earliest proposal nonce a member can vote on instead of using `block.timestamp`. 
-
 ## **[Technical-Mistake-1]** Quorum should be 25% of total members
 The project spec states that a quorum of 25% is needed, but instead of counting the number of members who voted for a proposal, you are counting the total voting power and comparing it to the total number of members at the time of proposal creation. This is against the spec.
 
@@ -60,11 +55,11 @@ Consider: removing the unnecessary checks.
 | Late                       | - |
 | Unfinished features        | - |
 | Extra features             | - |
-| Vulnerability              | 3 |
+| Vulnerability              | 1 |
 | Unanswered design exercise | - |
 | Insufficient tests         | - |
-| Technical mistake          | 2 |
+| Technical mistake          | 1 |
 
-Total: 5
+Total: 2
 
 Good work!
