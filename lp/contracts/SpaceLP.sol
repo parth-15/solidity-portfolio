@@ -16,10 +16,15 @@ contract SpaceLP is ERC20 {
 
     /// @notice Adds ETH-SPC liquidity to LP contract
     /// @param to The address that will receive the LP tokens
+    //@audit-info critical should use MINIMUM LIQUIDITY or not?
     function deposit(address to) external payable returns (uint256) {
         uint256 spcTransferred = spaceCoin.balanceOf(address(this)) -
             spcTokenBalance;
         uint256 ethTransferred = address(this).balance - ethBalance;
+        require(
+            spcTransferred > 0 && ethTransferred > 0,
+            "not enough amount provided"
+        );
         uint256 lpTokensTotalSupply = totalSupply();
         uint256 liquidity = 0;
         if (lpTokensTotalSupply == 0) {
@@ -44,7 +49,6 @@ contract SpaceLP is ERC20 {
 
     /// @notice Returns ETH-SPC liquidity to liquidity provider
     /// @param to The address that will receive the outbound token pair
-    //@audit-info how to use check effects interaction pattern here
     function withdraw(address to) external returns (uint256, uint256) {
         uint256 lpTokenBalance = balanceOf(address(this));
         uint256 currentSpcBalance = spaceCoin.balanceOf(address(this));
@@ -55,12 +59,13 @@ contract SpaceLP is ERC20 {
             lpTotalSupply;
         uint256 ethOut = (currentEthBalance * lpTokenBalance) / lpTotalSupply;
 
+        require(lpTokenBalance > 0, "insufficient liquidity");
+
         //Effects
-        //@audit-info should transfer before burning or not
         _burn(address(this), lpTokenBalance);
 
-        spcTokenBalance = spcTokenBalance - spcTokenOut;
-        ethBalance = ethBalance - ethOut;
+        spcTokenBalance = spaceCoin.balanceOf(address(this)) - spcTokenOut;
+        ethBalance = address(this).balance - ethOut;
 
         //Interactions
         spaceCoin.transfer(to, spcTokenOut);
@@ -123,6 +128,22 @@ contract SpaceLP is ERC20 {
             ethBalance = address(this).balance;
             //interactions
             spaceCoin.transfer(to, spcToBeSent);
+        }
+    }
+
+    function skim(address to) external {
+        uint256 ethToSend = address(this).balance - ethBalance;
+        ethBalance = address(this).balance - ethToSend;
+        if (ethToSend > 0) {
+            (bool success, ) = to.call{value: ethToSend}("");
+            require(success, "external call failed");
+        }
+        //don't put this above external call, otherwise there can be reentrancy attacks
+        uint256 spcToSend = spaceCoin.balanceOf(address(this)) -
+            spcTokenBalance;
+        spcTokenBalance = spaceCoin.balanceOf(address(this)) - spcToSend;
+        if (spcToSend > 0) {
+            spaceCoin.transfer(to, spcToSend);
         }
     }
 

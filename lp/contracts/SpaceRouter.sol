@@ -37,7 +37,6 @@ contract SpaceRouter {
     /// @notice Swaps ETH for SPC in LP contract
     /// @param spcOutMin The minimum acceptable amout of SPC to be received
     //@audit-info check if this is post tax
-    //@audit-info follow check-effect-interactions here
     function swapETHForSPC(uint256 spcOutMin)
         external
         payable
@@ -66,7 +65,6 @@ contract SpaceRouter {
     /// @notice Swaps SPC for ETH in LP contract
     /// @param spcIn The amount of inbound SPC to be swapped
     /// @param ethOutMin The minimum acceptable amount of ETH to be received
-    //@audit-info follow check effect interactions here
     function swapSPCForETH(uint256 spcIn, uint256 ethOutMin)
         external
         returns (uint256)
