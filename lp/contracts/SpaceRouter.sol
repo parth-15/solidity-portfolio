@@ -15,10 +15,34 @@ contract SpaceRouter {
 
     /// @notice Provides ETH-SPC liquidity to LP contract
     /// @param spc The amount of SPC to be deposited
-    //@audit-info what happen to transfer tax here. how much amount should I fetch
+    //@audit-info TODO critical, fetch only needed what happen to transfer tax here. how much amount should I fetch
     function addLiquidity(uint256 spc) external payable returns (uint256) {
+        uint256 spcDepositedInPool = spc -
+            (
+                spaceCoin.isTransferTaxEnabled()
+                    ? (spc * spaceCoin.TRANSFER_TAX_PERCENT()) / 100
+                    : 0
+            );
+
+        uint256 spcConsideredAsTransferred = spaceCoin.balanceOf(
+            address(spaceLP)
+        ) -
+            spaceLP.spcTokenBalance() +
+            spcDepositedInPool;
+        uint256 ethToTransfer = ((spaceLP.ethBalance() *
+            spcConsideredAsTransferred) / spaceLP.spcTokenBalance()) -
+            (address(spaceLP).balance - spaceLP.ethBalance());
+
+        require(ethToTransfer >= msg.value, "less eth sent");
+
         spaceCoin.transferFrom(msg.sender, address(spaceLP), spc);
-        uint256 liquidity = spaceLP.deposit{value: msg.value}(msg.sender);
+
+        uint256 liquidity = spaceLP.deposit{value: ethToTransfer}(msg.sender);
+
+        (bool success, ) = msg.sender.call{value: msg.value - ethToTransfer}(
+            ""
+        );
+        require(success, "external call failed");
         return liquidity;
     }
 
@@ -28,7 +52,6 @@ contract SpaceRouter {
         external
         returns (uint256, uint256)
     {
-        //@audit-info check if this syntax is correct
         spaceLP.transferFrom(msg.sender, address(spaceLP), lpToken);
         (uint256 spcOut, uint256 ethOut) = spaceLP.withdraw(msg.sender);
         return (spcOut, ethOut);
@@ -36,7 +59,6 @@ contract SpaceRouter {
 
     /// @notice Swaps ETH for SPC in LP contract
     /// @param spcOutMin The minimum acceptable amout of SPC to be received
-    //@audit-info check if this is post tax
     function swapETHForSPC(uint256 spcOutMin)
         external
         payable

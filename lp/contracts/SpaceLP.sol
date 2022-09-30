@@ -31,7 +31,7 @@ contract SpaceLP is ERC20 {
             liquidity = sqrt(spcTransferred * ethTransferred);
             require(liquidity > MINIMUM_LIQUIDITY, "insufficient liquidity");
             _mint(to, liquidity - MINIMUM_LIQUIDITY);
-            _mint(address(0), MINIMUM_LIQUIDITY);
+            _mint(address(1), MINIMUM_LIQUIDITY);
         } else {
             liquidity = min(
                 (lpTokensTotalSupply * spcTransferred) / spcTokenBalance,
@@ -77,13 +77,15 @@ contract SpaceLP is ERC20 {
 
     /// @notice Swaps ETH for SPC, or SPC for ETH
     /// @param to The address that will receive the outbound SPC or ETH
-    //@audit-info what should happen if someone sends one using self destruct
     function swap(address to) external payable {
         uint256 spcTransferred = spaceCoin.balanceOf(address(this)) -
             spcTokenBalance;
         uint256 ethTransferred = address(this).balance - ethBalance;
         if (spcTransferred > 0 && ethTransferred > 0) {
-            require(true, "can't send both assets");
+            require(
+                true,
+                "Swap unavailable while both ETH and SPC actual balances are out of sync with their corresponding reserve balances. Consider syncing the reserve balances before continuing."
+            );
         }
         if (spcTransferred == 0 && ethTransferred == 0) {
             require(true, "no assets sent");
@@ -97,7 +99,7 @@ contract SpaceLP is ERC20 {
             uint256 finalSpcBalance = spaceCoin.balanceOf(address(this));
             //Checks
             require(
-                finalEthBalance * finalSpcBalance >
+                finalEthBalance * finalSpcBalance >=
                     spcTokenBalance * ethBalance,
                 "invalid swap"
             );
@@ -117,7 +119,7 @@ contract SpaceLP is ERC20 {
                 spcToBeSent;
             //checks
             require(
-                finalEthBalance * finalSpcBalance >
+                finalEthBalance * finalSpcBalance >=
                     spcTokenBalance * ethBalance,
                 "invalid swap"
             );
@@ -167,7 +169,7 @@ contract SpaceLP is ERC20 {
             uint256 finalEthBalance = ethInReserve;
 
             require(
-                finalSpcBalance * finalEthBalance >
+                finalSpcBalance * finalEthBalance >=
                     spcTokenBalance * ethBalance,
                 "invalid swap"
             );
@@ -181,7 +183,7 @@ contract SpaceLP is ERC20 {
             uint256 finalSpcBalance = spcInReserve;
             uint256 finalEthBalance = ethBalance - ethToBeAdded;
             require(
-                finalSpcBalance * finalEthBalance >
+                finalSpcBalance * finalEthBalance >=
                     spcTokenBalance * ethBalance,
                 "invalid swap"
             );

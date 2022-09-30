@@ -15,6 +15,7 @@ contract ICO {
     uint256 public constant OPEN_PHASE_TOTAL_CONTRIBUTION_LIMIT = 30_000 ether;
     address public immutable OWNER;
     address public immutable SPC_TOKEN_ADDRESS;
+    address public immutable TREASURY_ADDRESS;
     uint256 public currentTotalContribution;
     bool public isFundraisingAndSpcRedemptionPaused = false;
     Phase public currentPhase = Phase.SEED;
@@ -59,6 +60,7 @@ contract ICO {
 
     constructor(address treasury) {
         OWNER = msg.sender;
+        TREASURY_ADDRESS = treasury;
         SpaceCoin spaceCoin = new SpaceCoin(OWNER, treasury, address(this));
         SPC_TOKEN_ADDRESS = address(spaceCoin);
     }
@@ -183,6 +185,7 @@ contract ICO {
             currentPhase == Phase.OPEN,
             "can redeem only during open phase"
         );
+        require(msg.sender == TREASURY_ADDRESS, "only treasury allowed");
         uint256 balance = address(this).balance;
         (bool success, ) = to.call{value: balance}("");
         require(success, "call failed");
