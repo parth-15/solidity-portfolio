@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./SpaceCoin.sol";
+import "hardhat/console.sol";
 
 contract SpaceLP is ERC20 {
     uint256 public constant MINIMUM_LIQUIDITY = 1000;
@@ -55,6 +56,8 @@ contract SpaceLP is ERC20 {
         uint256 currentEthBalance = address(this).balance;
         uint256 lpTotalSupply = totalSupply();
 
+        require(lpTotalSupply > 0, "nothing to withdraw");
+
         uint256 spcTokenOut = (currentSpcBalance * lpTokenBalance) /
             lpTotalSupply;
         uint256 ethOut = (currentEthBalance * lpTokenBalance) / lpTotalSupply;
@@ -83,13 +86,14 @@ contract SpaceLP is ERC20 {
         uint256 ethTransferred = address(this).balance - ethBalance;
         if (spcTransferred > 0 && ethTransferred > 0) {
             require(
-                true,
+                false,
                 "Swap unavailable while both ETH and SPC actual balances are out of sync with their corresponding reserve balances. Consider syncing the reserve balances before continuing."
             );
         }
         if (spcTransferred == 0 && ethTransferred == 0) {
-            require(true, "no assets sent");
+            require(false, "no assets sent");
         }
+
         if (spcTransferred > 0) {
             uint256 spcToBeAdded = spcTransferred - (spcTransferred) / 100;
             uint256 ethInReserve = (spcTokenBalance * ethBalance) /
@@ -155,19 +159,25 @@ contract SpaceLP is ERC20 {
         returns (uint256)
     {
         if (ethAmount > 0 && spcAmount > 0) {
-            require(true, "can't send both assets");
+            require(false, "can't send both assets");
         }
         if (ethAmount == 0 && spcAmount == 0) {
-            require(true, "no assets sent");
+            require(false, "no assets sent");
         }
         if (spcAmount > 0) {
             uint256 spcToBeAdded = spcAmount - (spcAmount) / 100;
             uint256 ethInReserve = (spcTokenBalance * ethBalance) /
                 (spcTokenBalance + spcToBeAdded);
             uint256 ethToBeSent = ethBalance - ethInReserve;
-            uint256 finalSpcBalance = spcTokenBalance + spcToBeAdded;
+            uint256 finalSpcBalance = spcTokenBalance + spcAmount;
             uint256 finalEthBalance = ethInReserve;
-
+            // console.log(
+            //     finalSpcBalance * finalEthBalance,
+            //     // spcToBeAdded,
+            //     spcTokenBalance * ethBalance,
+            //     ethInReserve,
+            //     ethToBeSent
+            // );
             require(
                 finalSpcBalance * finalEthBalance >=
                     spcTokenBalance * ethBalance,
@@ -181,7 +191,7 @@ contract SpaceLP is ERC20 {
                 (ethBalance + ethToBeAdded);
             uint256 spcToBeSent = spcTokenBalance - spcInReserve;
             uint256 finalSpcBalance = spcInReserve;
-            uint256 finalEthBalance = ethBalance - ethToBeAdded;
+            uint256 finalEthBalance = ethBalance + ethAmount;
             require(
                 finalSpcBalance * finalEthBalance >=
                     spcTokenBalance * ethBalance,
@@ -196,7 +206,7 @@ contract SpaceLP is ERC20 {
     }
 
     // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
-    function sqrt(uint y) internal pure returns (uint z) {
+    function sqrt(uint y) public pure returns (uint z) {
         if (y > 3) {
             z = y;
             uint x = y / 2 + 1;
