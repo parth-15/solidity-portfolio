@@ -51,6 +51,17 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 <!-- Copy + paste your coverage report here before submitting your project -->
 <!-- You can see how to generate a coverage report in the "Solidity Code Coverage" section located here: -->
 <!-- https://learn.0xmacro.com/training/project-crowdfund/p/4 -->
+File              |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+------------------|----------|----------|----------|----------|----------------|
+ contracts/       |    99.34 |       85 |      100 |    99.48 |                |
+  Ico.sol         |      100 |    92.42 |      100 |      100 |                |
+  SpaceCoin.sol   |      100 |      100 |      100 |      100 |                |
+  SpaceLP.sol     |     98.7 |    73.21 |      100 |    98.94 |            218 |
+  SpaceRouter.sol |      100 |    91.67 |      100 |      100 |                |
+ contracts/test/  |      100 |      100 |      100 |      100 |                |
+  ForceFeeder.sol |      100 |      100 |      100 |      100 |                |
+All files         |    99.35 |       85 |      100 |    99.49 |                |
+
 
 ## Design Exercise Answer
 <!-- Answer the Design Exercise. -->

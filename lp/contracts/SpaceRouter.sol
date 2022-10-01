@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./SpaceLP.sol";
 import "./SpaceCoin.sol";
+import "hardhat/console.sol";
 
 contract SpaceRouter {
     SpaceLP public immutable spaceLP;
@@ -24,16 +25,19 @@ contract SpaceRouter {
                     : 0
             );
 
+        //will get the liquidity of unsync spc reserve
         uint256 spcConsideredAsTransferred = spaceCoin.balanceOf(
             address(spaceLP)
         ) -
             spaceLP.spcTokenBalance() +
             spcDepositedInPool;
-        uint256 ethToTransfer = ((spaceLP.ethBalance() *
-            spcConsideredAsTransferred) / spaceLP.spcTokenBalance()) -
-            (address(spaceLP).balance - spaceLP.ethBalance());
+        uint256 ethToTransfer = spaceLP.spcTokenBalance() == 0
+            ? msg.value
+            : ((spaceLP.ethBalance() * spcConsideredAsTransferred) /
+                spaceLP.spcTokenBalance()) -
+                (address(spaceLP).balance - spaceLP.ethBalance());
 
-        require(ethToTransfer >= msg.value, "less eth sent");
+        require(msg.value >= ethToTransfer, "less eth sent");
 
         spaceCoin.transferFrom(msg.sender, address(spaceLP), spc);
 
@@ -52,6 +56,10 @@ contract SpaceRouter {
         external
         returns (uint256, uint256)
     {
+        require(
+            lpToken <= spaceLP.balanceOf(msg.sender),
+            "not enough lp tokens"
+        );
         spaceLP.transferFrom(msg.sender, address(spaceLP), lpToken);
         (uint256 spcOut, uint256 ethOut) = spaceLP.withdraw(msg.sender);
         return (spcOut, ethOut);

@@ -1,23 +1,56 @@
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const [deployer] = await ethers.getSigners();
+  const treasury = "0x0471C37af7C17f880BCAA81A47AF9eDBe2f28F26";
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  await lock.deployed();
+  const ICO = await ethers.getContractFactory("ICO");
+  const ico = await ICO.deploy(treasury);
+  const SPACELP = await ethers.getContractFactory("SpaceLP");
+  const spaceLP = await SPACELP.deploy(await ico.SPC_TOKEN_ADDRESS());
+  const SPACEROUTER = await ethers.getContractFactory("SpaceRouter");
+  const spaceRouter = await SPACEROUTER.deploy(
+    spaceLP.address,
+    await ico.SPC_TOKEN_ADDRESS()
+  );
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log("ico address:", ico.address);
+  console.log("spacecoin address", await ico.SPC_TOKEN_ADDRESS());
+  console.log("spaceLP address", spaceLP.address);
+  console.log("spaceRouter address", spaceRouter.address);
+
+  await ico.deployTransaction.wait(5);
+
+  await hre.run("verify:verify", {
+    address: ico.address,
+    constructorArguments: [treasury],
+  });
+
+  await hre.run("verify:verify", {
+    address: await ico.SPC_TOKEN_ADDRESS(),
+    constructorArguments: [deployer.address, treasury, ico.address],
+  });
+
+  await hre.run("verify:verify", {
+    address: spaceLP.address,
+    constructorArguments: [await ico.SPC_TOKEN_ADDRESS()],
+  });
+
+  await hre.run("verify:verify", {
+    address: spaceRouter.address,
+    constructorArguments: [spaceLP.address, await ico.SPC_TOKEN_ADDRESS()],
+  });
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// spacecoin address 0x18cc75F62Dc72308faa386b9B802B97a57603aD6
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
