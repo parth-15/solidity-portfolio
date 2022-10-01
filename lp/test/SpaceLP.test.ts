@@ -1,4 +1,3 @@
-import { ForceFeeder } from "./../typechain-types/contracts/test/ForceFeeder";
 /* eslint-disable no-unused-expressions */
 import { expect } from "chai";
 import { ethers } from "hardhat";
@@ -12,7 +11,6 @@ import {
   SpaceRouter,
   ForceFeeder,
 } from "../typechain-types";
-import { any } from "hardhat/internal/core/params/argumentTypes";
 
 const SECONDS_IN_DAY: number = 60 * 60 * 24;
 const ONE_ETHER: BigNumber = ethers.utils.parseEther("1");
@@ -423,25 +421,9 @@ describe("SpaceLP", () => {
       const expectedTrader1EthBalanceAfter = trader1EthBalanceBefore.add(
         ethers.utils.parseEther("19.41")
       );
-      //   console.log(
-      //     trader1EthBalanceBefore,
-      //     trader1EthBalanceAfter,
-      //     expectedTrader1EthBalanceAfter
-      //   );
-      //   await closeTo(
-      //     trader1EthBalanceAfter,
-      //     expectedTrader1EthBalanceAfter,
-      //     ethers.utils.parseEther("0.001")
-      //   );
-
-      expect(trader1EthBalanceAfter).to.be.closeTo(
-        expectedTrader1EthBalanceAfter,
-        2
-      );
-      //   expect(trader1EthBalanceAfter).to.be.closeTo(
-      //     expectedTrader1EthBalanceAfter,
-      //     1000000000000
-      //   );
+      expect(
+        expectedTrader1EthBalanceAfter.sub(trader1EthBalanceAfter)
+      ).lessThanOrEqual(ethers.utils.parseEther("0.0000000001"));
     });
 
     it("performs eth to spc swap correctly", async () => {
@@ -476,16 +458,9 @@ describe("SpaceLP", () => {
       const expectedTrader1SpcBalanceAfter = trader1SpcBalanceBefore.add(
         ethers.utils.parseEther("450.40")
       );
-      //   console.log(
-      //     trader1SpcBalanceBefore,
-      //     trader1SpcBalanceSpcAfter,
-      //     expectedTrader1SpcBalanceAfter
-      //   );
-      //   await closeTo(
-      //     trader1SpcBalanceSpcAfter,
-      //     expectedTrader1SpcBalanceAfter,
-      //     ethers.utils.parseEther("0.001")
-      //   );
+      expect(
+        expectedTrader1SpcBalanceAfter.sub(trader1SpcBalanceSpcAfter)
+      ).lessThanOrEqual(ethers.utils.parseEther("0.0000000001"));
     });
   });
 
@@ -546,11 +521,10 @@ describe("SpaceLP", () => {
         .connect(trader1)
         .quoteSwapPrice(0, ONE_ETHER.mul(100));
       console.log(quotedEth);
-      //   await closeTo(
-      //     quotedEth,
-      //     ethers.utils.parseEther("19.41"),
-      //     ethers.utils.parseEther("0.001")
-      //   );
+
+      expect(quotedEth.sub(ethers.utils.parseEther("19.41"))).lessThanOrEqual(
+        ethers.utils.parseEther("0.01")
+      );
     });
 
     it("quotes eth to spc swap correctly", async () => {
@@ -574,11 +548,9 @@ describe("SpaceLP", () => {
       const quotedSpc = await spaceLP
         .connect(trader1)
         .quoteSwapPrice(ONE_ETHER.mul(100), 0);
-      //   await closeTo(
-      //     quotedSpc,
-      //     ethers.utils.parseEther("450.40"),
-      //     ethers.utils.parseEther("0.001")
-      //   );
+      expect(quotedSpc.sub(ethers.utils.parseEther("450.40"))).lessThanOrEqual(
+        ethers.utils.parseEther("0.01")
+      );
     });
   });
 });
