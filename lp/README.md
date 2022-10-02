@@ -42,10 +42,46 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 
 ## Technical Spec
 <!-- Here you should list the technical requirements of the project. These should include the points given in the project spec, but will go beyond what is given in the spec because that was written by a non-technical client who leaves it up to you to fill in the spec's details -->
+### SpaceLP 
+#### Deposit
+- Anyone can deposit SPC tokens and ETH to the LP contract to earn some LP tokens.
+- If only one of the assets is considered as transferred by the pool, it reverts.
+- If no assets is transferred, it reverts.
+- The pool mints different LP tokens based on whether it is first liquidity or not.
+- The user is penalized by the pool for depositing inconsistent liquidity.
+- There is no fee for deposit.
 
--
--
--
+#### Withdraw
+- For withdrawal of liquidity, the LP provider should first transfer the LP tokens to the pool.
+- The pool then sends the SPC token and ETH according to deposited LP tokens.
+- LP tokens are burned.
+- Total supply of LP tokens should be more than `0` for withdraw to be called.
+- There is no fee for withdrawal.
+
+#### Swap
+- Traders can trade SPC for ETH and ETH for SPC.
+- The fee taken for trade is `1%` and is taken on input amount made.
+- If both the assets are considered as transferred by the LP pool, it reverts.
+- Amount to be sent to trader is calculated based on constant product formula.
+
+### SpaceRouter
+#### AddLiquidity
+- Router allows liquidity providers to add liquidity to LP pool.
+- It prevents liquidity provider to send imbalanced liquidity.
+- If liquidity provided is for first time, it accepts any amount.
+  
+#### RemoveLiquidity
+- Router allows liquidity providers to remove liquidity from the pool and get tokens back.
+- Liquidity providers first needs to give allowance to router to fetch LP tokens and send it to pool.
+
+#### swapETHForSPC
+- Allows trading ETH for SPC. 
+- Traders need to send ETH to router contract and router contract forwards ETH to LP pool.
+
+#### swapSPCForETH
+- Allows trading SPC for ETH.
+- Traders first needs to give allowance to router to fetch SPC tokens and send it to pool.
+
 
 ## Code Coverage Report
 <!-- Copy + paste your coverage report here before submitting your project -->
@@ -69,15 +105,19 @@ All files         |    99.35 |    85.42 |      100 |    99.49 |                |
 <!-- In your answer: (1) Consider the tradeoffs of your design, and (2) provide some pseudocode, or a diagram, to illustrate how one would get started. -->
 
 > How would you extend your LP contract to award additional rewards – say, a separate ERC-20 token – to further incentivize liquidity providers to deposit into your pool?
+- The staking mechanism is offered by some of the protocols that allows users to stake their liquidity tokens and earn more tokens based on that. For that, users are encouraged to put LP tokens in the protocol and not in their wallets. The benefits of staking for the protocol is that they can lend the deposited liquidity based on LP tokens that are staked. This will help the protocol to earn from lending.
+- The drawback for LP providers is that LP tokens will become inflationary which will result in it's less value(market price) and they won't be incentivized for depositing liquidity.
+- The pseudocode for using staking functionality in code is https://solidity-by-example.org/defi/staking-rewards/. 
+- It basically tracks `rewardPerTokenStored` and `updatedAt` and try to add rewards in each block. But it is calculated in gas efficient way.
 
 ## Testnet Deploy Information
 
 | Contract | Address Etherscan Link |
 | -------- | ------- |
-| SpaceCoin | `https://goerli.etherscan.io/address/0x5E78CE071B6a199C6253EA7FB6Eb90A308c5483c` |
-| ICO | `https://goerli.etherscan.io/address/0x08654c2630482ba778d19416664D2273191CA7E2` |
-| Router | `https://goerli.etherscan.io/address/0x27BDaBa8fb7DFf3d9051643Dfe468a9F7c95eE281` |
-| Pool | `https://goerli.etherscan.io/address/0xF526dE308F75Fe633Aa1be67E691a73DEb98460d` |
+| SpaceCoin | `https://goerli.etherscan.io/address/0x19066e52ac3144547F9ADaa056d1057fe19d2E92` |
+| ICO | `https://goerli.etherscan.io/address/0xc12687a79342b17b08279c47a09939424b705487` |
+| Router | `https://goerli.etherscan.io/address/0x583A34348ef232698e806d07Ae8C1076aaD3de24` |
+| Pool | `https://goerli.etherscan.io/address/0xaD42c67e176BDba17A17691538c1891b2669bF83` |
 
 ## Useful Commands
 

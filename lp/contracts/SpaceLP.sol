@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./SpaceCoin.sol";
-import "hardhat/console.sol";
 
 contract SpaceLP is ERC20 {
     uint256 public constant MINIMUM_LIQUIDITY = 1000;

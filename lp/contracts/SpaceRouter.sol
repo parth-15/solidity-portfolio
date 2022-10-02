@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "./SpaceLP.sol";
 import "./SpaceCoin.sol";
-import "hardhat/console.sol";
 
 contract SpaceRouter {
     SpaceLP public immutable spaceLP;
