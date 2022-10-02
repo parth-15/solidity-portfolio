@@ -17,7 +17,6 @@ contract SpaceLP is ERC20 {
 
     /// @notice Adds ETH-SPC liquidity to LP contract
     /// @param to The address that will receive the LP tokens
-    //@audit-info critical should use MINIMUM LIQUIDITY or not?
     function deposit(address to) external payable returns (uint256) {
         uint256 spcTransferred = spaceCoin.balanceOf(address(this)) -
             spcTokenBalance;
@@ -94,6 +93,8 @@ contract SpaceLP is ERC20 {
             require(false, "no assets sent");
         }
 
+        require(totalSupply() > 0, "no liquidity");
+
         if (spcTransferred > 0) {
             uint256 spcToBeAdded = spcTransferred - (spcTransferred) / 100;
             uint256 ethInReserve = (spcTokenBalance * ethBalance) /
@@ -128,9 +129,7 @@ contract SpaceLP is ERC20 {
                 "invalid swap"
             );
             //effects
-            spcTokenBalance =
-                spaceCoin.balanceOf(address(this)) -
-                spcTokenBalance;
+            spcTokenBalance = spaceCoin.balanceOf(address(this)) - spcToBeSent;
             ethBalance = address(this).balance;
             //interactions
             spaceCoin.transfer(to, spcToBeSent);
@@ -164,6 +163,9 @@ contract SpaceLP is ERC20 {
         if (ethAmount == 0 && spcAmount == 0) {
             require(false, "no assets sent");
         }
+
+        require(totalSupply() > 0, "no liquidity");
+
         if (spcAmount > 0) {
             uint256 spcToBeAdded = spcAmount - (spcAmount) / 100;
             uint256 ethInReserve = (spcTokenBalance * ethBalance) /
@@ -171,13 +173,6 @@ contract SpaceLP is ERC20 {
             uint256 ethToBeSent = ethBalance - ethInReserve;
             uint256 finalSpcBalance = spcTokenBalance + spcAmount;
             uint256 finalEthBalance = ethInReserve;
-            // console.log(
-            //     finalSpcBalance * finalEthBalance,
-            //     // spcToBeAdded,
-            //     spcTokenBalance * ethBalance,
-            //     ethInReserve,
-            //     ethToBeSent
-            // );
             require(
                 finalSpcBalance * finalEthBalance >=
                     spcTokenBalance * ethBalance,

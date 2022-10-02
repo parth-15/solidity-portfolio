@@ -16,7 +16,6 @@ contract SpaceRouter {
 
     /// @notice Provides ETH-SPC liquidity to LP contract
     /// @param spc The amount of SPC to be deposited
-    //@audit-info TODO critical, fetch only needed what happen to transfer tax here. how much amount should I fetch
     function addLiquidity(uint256 spc) external payable returns (uint256) {
         uint256 spcDepositedInPool = spc -
             (

@@ -462,6 +462,26 @@ describe("SpaceLP", () => {
         expectedTrader1SpcBalanceAfter.sub(trader1SpcBalanceSpcAfter)
       ).lessThanOrEqual(ethers.utils.parseEther("0.0000000001"));
     });
+
+    it("swap reverts if there is no liquidity", async () => {
+      const {
+        spaceCoin,
+        spaceLP,
+        spaceRouter,
+        lpProvider1,
+        lpProvider2,
+        sam,
+        trader1,
+        forceFeeder,
+        trader2,
+      } = await loadFixture(setupFixture);
+      await spaceCoin
+        .connect(lpProvider1)
+        .transfer(spaceLP.address, ONE_ETHER.mul(5000));
+      await expect(
+        spaceLP.connect(trader1).swap(trader1.address)
+      ).to.be.revertedWith("no liquidity");
+    });
   });
 
   describe("Quote prices", () => {
@@ -551,6 +571,26 @@ describe("SpaceLP", () => {
       expect(quotedSpc.sub(ethers.utils.parseEther("450.40"))).lessThanOrEqual(
         ethers.utils.parseEther("0.01")
       );
+    });
+
+    it("quote swap price reverts if there is no liquidity", async () => {
+      const {
+        spaceCoin,
+        spaceLP,
+        spaceRouter,
+        lpProvider1,
+        lpProvider2,
+        sam,
+        trader1,
+        forceFeeder,
+        trader2,
+      } = await loadFixture(setupFixture);
+      await spaceCoin
+        .connect(lpProvider1)
+        .transfer(spaceLP.address, ONE_ETHER.mul(5000));
+      await expect(
+        spaceLP.connect(trader1).quoteSwapPrice(100, 0)
+      ).to.be.revertedWith("no liquidity");
     });
   });
 });
