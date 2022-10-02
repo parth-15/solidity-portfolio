@@ -10,13 +10,18 @@ async function main() {
 
   const ICO = await ethers.getContractFactory("ICO");
   const ico = await ICO.deploy(treasury);
+  await ico.deployTransaction.wait(1);
+
   const SPACELP = await ethers.getContractFactory("SpaceLP");
   const spaceLP = await SPACELP.deploy(await ico.SPC_TOKEN_ADDRESS());
+  await spaceLP.deployTransaction.wait(1);
+
   const SPACEROUTER = await ethers.getContractFactory("SpaceRouter");
   const spaceRouter = await SPACEROUTER.deploy(
     spaceLP.address,
     await ico.SPC_TOKEN_ADDRESS()
   );
+  await spaceRouter.deployTransaction.wait(1);
 
   console.log("ico address:", ico.address);
   console.log("spacecoin address", await ico.SPC_TOKEN_ADDRESS());
@@ -24,6 +29,8 @@ async function main() {
   console.log("spaceRouter address", spaceRouter.address);
 
   await ico.deployTransaction.wait(5);
+  await spaceLP.deployTransaction.wait(5);
+  await spaceRouter.deployTransaction.wait(5);
 
   await hre.run("verify:verify", {
     address: ico.address,

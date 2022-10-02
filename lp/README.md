@@ -53,14 +53,15 @@ Now you're all setup to begin writing tests and smart contracts! Check out the `
 <!-- https://learn.0xmacro.com/training/project-crowdfund/p/4 -->
 File              |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 ------------------|----------|----------|----------|----------|----------------|
- contracts/       |    99.34 |       85 |      100 |    99.48 |                |
+ contracts/       |    99.35 |    85.42 |      100 |    99.49 |                |
   Ico.sol         |      100 |    92.42 |      100 |      100 |                |
   SpaceCoin.sol   |      100 |      100 |      100 |      100 |                |
-  SpaceLP.sol     |     98.7 |    73.21 |      100 |    98.94 |            218 |
+  SpaceLP.sol     |    98.73 |       75 |      100 |    98.96 |            214 |
   SpaceRouter.sol |      100 |    91.67 |      100 |      100 |                |
  contracts/test/  |      100 |      100 |      100 |      100 |                |
   ForceFeeder.sol |      100 |      100 |      100 |      100 |                |
-All files         |    99.35 |       85 |      100 |    99.49 |                |
+All files         |    99.35 |    85.42 |      100 |    99.49 |                |
+
 
 
 ## Design Exercise Answer
@@ -73,10 +74,10 @@ All files         |    99.35 |       85 |      100 |    99.49 |                |
 
 | Contract | Address Etherscan Link |
 | -------- | ------- |
-| SpaceCoin | `FILL_ME_IN` |
-| ICO | `FILL_ME_IN` |
-| Router | `FILL_ME_IN` |
-| Pool | `FILL_ME_IN` |
+| SpaceCoin | `https://goerli.etherscan.io/address/0x5E78CE071B6a199C6253EA7FB6Eb90A308c5483c` |
+| ICO | `https://goerli.etherscan.io/address/0x08654c2630482ba778d19416664D2273191CA7E2` |
+| Router | `https://goerli.etherscan.io/address/0x27BDaBa8fb7DFf3d9051643Dfe468a9F7c95eE281` |
+| Pool | `https://goerli.etherscan.io/address/0xF526dE308F75Fe633Aa1be67E691a73DEb98460d` |
 
 ## Useful Commands
 
