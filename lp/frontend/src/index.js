@@ -1,12 +1,22 @@
 import { ethers } from "ethers"
-// import RouterJSON from '../../artifacts/contracts/Router.sol/Router.json'
+import SpaceRouterJSON from '../../artifacts/contracts/SpaceRouter.sol/SpaceRouter.json';
+import SpaceLPJSON from '../../artifacts/contracts/SpaceLP.sol/SpaceLP.json';
+import IcoJSON from '../../artifacts/contracts/Ico.sol/ICO.json';
+import SpaceCoinJSON from '../../artifacts/contracts/SpaceCoin.sol/SpaceCoin.json';
 
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
 
-// const routerAddr = '0x422Db2b48c44c0A1Bf748f4bf304A8093b8F4eb6'
-// const contract = new ethers.Contract(routerAddr, RouterJSON.abi, provider);
+const icoAddr = '0x08654c2630482ba778d19416664D2273191CA7E2'
+const spaceCoinAddr = '0x5E78CE071B6a199C6253EA7FB6Eb90A308c5483c'
+const spaceLPAddr = '0xF526dE308F75Fe633Aa1be67E691a73DEb98460d'
+const spaceRouterAddr = '0x27BDaBa8fb7DFf3d9051643Dfe468a9F7c95eE28'
+
+const icoContract = new ethers.Contract(icoAddr, IcoJSON.abi, provider);
+const spaceCoinContract = new ethers.Contract(spaceCoinAddr, SpaceCoinJSON.abi, provider);
+const spaceLPContract = new ethers.Contract(spaceLPAddr, SpaceLPJSON.abi, provider);
+const spaceRouterContract = new ethers.Contract(spaceRouterAddr, SpaceRouterJSON.abi, provider);
 
 async function connectToMetamask() {
   try {
@@ -30,7 +40,14 @@ ico_spc_buy.addEventListener('submit', async e => {
   console.log("Buying", eth, "eth")
 
   await connectToMetamask()
-  // TODO: Call ico contract contribute function
+  try {
+    const unconfirmedTx = await icoContract.connect(signer).contribute({value: eth})
+    await unconfirmedTx.wait();
+    ico_spc_left.innerHTML = ethers.utils.formatEther(ethers.utils.parseEther("150000").sub(BigNumber.from(await icoContract.currentTotalContribution()).mul(5))) 
+    ico_error.innerHTML = "";
+  } catch (err) {
+    ico_error.innerHTML = err.reason;
+  }
 })
 
 
@@ -39,10 +56,20 @@ ico_spc_buy.addEventListener('submit', async e => {
 //
 let currentSpcToEthPrice = 5
 
-provider.on("block", n => {
+provider.on("block", async n => {
   console.log("New block", n)
-  // TODO: Update currentSpcToEthPrice
+  try {
+
+    let currentSpcInPool = await spaceLPContract.spcTokenBalance();
+    let currentEthInPool = await spaceLPContract.ethBalance();
+    currentSpcToEthPrice = currentEthInPool > 0 ? currentSpcInPool/currentEthInPool : 0;
+
+  } catch(err) {
+    ico_error.innerHTML = err.reason;
+  }
 })
+
+console.log("currentSpcToEthPrice", currentSpcToEthPrice)
 
 lp_deposit.eth.addEventListener('input', e => {
   lp_deposit.spc.value = +e.target.value * currentSpcToEthPrice
@@ -60,7 +87,16 @@ lp_deposit.addEventListener('submit', async e => {
   console.log("Depositing", eth, "eth and", spc, "spc")
 
   await connectToMetamask()
-  // TODO: Call router contract deposit function
+
+  try {
+    const unconfirmedTx1 = await spaceCoinContract.connect(signer).approve(spaceRouterAddr, spc);
+    await unconfirmedTx1.wait();
+    const unconfirmedTx2 = await spaceRouterContract.connect(signer).addLiquidity(spc, {value: eth});
+    await unconfirmedTx2.wait();
+  } catch (err) {
+    lp_deposit_error.innerHTML = err.reason;
+  }
+
 })
 
 lp_withdraw.addEventListener('submit', async e => {
@@ -68,7 +104,15 @@ lp_withdraw.addEventListener('submit', async e => {
   console.log("Withdrawing 100% of LP")
 
   await connectToMetamask()
-  // TODO: Call router contract withdraw function
+  try {
+    const lpToken = await spaceLPContract.connect(signer).balanceOf(await signer.getAddress());
+    const unconfirmedTx = await spaceLPContract.connect(signer).increaseAllowance(spaceRouterAddr, ethers.utils.parseEther("10000000"));
+    unconfirmedTx.wait()
+    const unconfirmedTx1 = await spaceRouterContract.connect(signer).removeLiquidity(lpToken);
+    await unconfirmedTx1.wait();
+  } catch (err) {
+    lp_withdraw_error.innerHTML = err.reason;
+  }
 })
 
 //
@@ -104,5 +148,27 @@ swap.addEventListener('submit', async e => {
   console.log("Swapping", ethers.utils.formatEther(amountIn), swapIn.type, "for", swapOut.type)
 
   await connectToMetamask()
-  // TODO: Call router contract swap function
+  try {
+
+    if (swapIn.type == 'eth') {
+      const expectedSpcToReceive = await spaceLPContract.quoteSwapPrice(amountIn, 0);
+      const slippageAdjusted = expectedSpcToReceive - (expectedSpcToReceive * maxSlippage)/100;
+      const unconfirmedTx1 = await spaceRouterContract.connect(signer).swapETHForSPC(slippageAdjusted, {value: amountIn});
+    await unconfirmedTx1.wait();
+    } else {
+
+      const unconfirmedTx1 = await spaceCoinContract.connect(signer).approve(spaceRouterAddr, amountIn);
+      await unconfirmedTx1.wait();
+
+      const expectedEthToReceive = await spaceLPContract.quoteSwapPrice(0, amountIn);
+      const slippageAdjusted = expectedEthToReceive - (expectedEthToReceive * maxSlippage)/100;
+      const unconfirmedTx2 = await spaceRouterContract.connect(signer).swapSPCForETH(amountIn, slippageAdjusted);
+      await unconfirmedTx2.wait();
+    }
+
+  } catch(err) {
+    swap_error.innerHTML = err.reason;
+    console.log(err)
+
+  }
 })
