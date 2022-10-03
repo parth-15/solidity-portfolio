@@ -35,17 +35,35 @@ contract SpaceRouter {
                 spaceLP.spcTokenBalance()) -
                 (address(spaceLP).balance - spaceLP.ethBalance());
 
-        require(msg.value >= ethToTransfer, "less eth sent");
+        uint256 ethConsideredAsTransferred = address(spaceLP).balance -
+            spaceLP.ethBalance() +
+            msg.value;
+        uint256 spcToTransfer = spaceLP.spcTokenBalance() == 0
+            ? spc
+            : ((spaceLP.spcTokenBalance() * ethConsideredAsTransferred) /
+                spaceLP.ethBalance()) -
+                (spaceCoin.balanceOf(address(spaceLP)) -
+                    spaceLP.spcTokenBalance());
 
-        spaceCoin.transferFrom(msg.sender, address(spaceLP), spc);
+        if (msg.value >= ethToTransfer) {
+            spaceCoin.transferFrom(msg.sender, address(spaceLP), spc);
 
-        uint256 liquidity = spaceLP.deposit{value: ethToTransfer}(msg.sender);
+            uint256 liquidity = spaceLP.deposit{value: ethToTransfer}(
+                msg.sender
+            );
 
-        (bool success, ) = msg.sender.call{value: msg.value - ethToTransfer}(
-            ""
-        );
-        require(success, "external call failed");
-        return liquidity;
+            (bool success, ) = msg.sender.call{
+                value: msg.value - ethToTransfer
+            }("");
+            require(success, "external call failed");
+            return liquidity;
+        } else {
+            require(spc >= spcToTransfer, "not enough spc sent");
+
+            spaceCoin.transferFrom(msg.sender, address(spaceLP), spcToTransfer);
+            uint256 liquidity = spaceLP.deposit{value: msg.value}(msg.sender);
+            return liquidity;
+        }
     }
 
     /// @notice Removes ETH-SPC liquidity from LP contract

@@ -670,18 +670,30 @@ describe("SpaceRouter", () => {
       expect(lpTokensAfterFirstLiquidity).to.be.equal(
         (await spaceLP.sqrt(ONE_ETHER.mul(5).mul(ONE_ETHER))).sub(1000)
       );
-
-      await expect(
-        spaceRouter
+      const lpProvider2InitialSpcBalance = await spaceCoin.balanceOf(
+        lpProvider2.address
+      );
+      expect(
+        await spaceRouter
           .connect(lpProvider2)
           .addLiquidity(ONE_ETHER.mul(20), { value: ONE_ETHER.mul(3) })
-      ).to.be.revertedWith("less eth sent");
+      ).to.be.ok;
 
       const lpTokensOfLpProvider2 = await spaceLP.balanceOf(
         lpProvider2.address
       );
 
-      expect(lpTokensOfLpProvider2).to.be.equal(0);
+      const lpProvider2AfterSpcBalance = await spaceCoin.balanceOf(
+        lpProvider2.address
+      );
+
+      expect(lpTokensOfLpProvider2).to.be.equal(
+        (await spaceLP.sqrt(ONE_ETHER.mul(5).mul(ONE_ETHER))).mul(3)
+      );
+
+      expect(lpProvider2AfterSpcBalance.add(ONE_ETHER.mul(15))).equal(
+        lpProvider2InitialSpcBalance
+      );
     });
 
     it("add second liquidity sends additional ether", async () => {

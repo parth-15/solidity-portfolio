@@ -114,10 +114,10 @@ All files         |    99.35 |    85.42 |      100 |    99.49 |                |
 
 | Contract | Address Etherscan Link |
 | -------- | ------- |
-| SpaceCoin | `https://goerli.etherscan.io/address/0x19066e52ac3144547F9ADaa056d1057fe19d2E92` |
-| ICO | `https://goerli.etherscan.io/address/0xc12687a79342b17b08279c47a09939424b705487` |
-| Router | `https://goerli.etherscan.io/address/0x583A34348ef232698e806d07Ae8C1076aaD3de24` |
-| Pool | `https://goerli.etherscan.io/address/0xaD42c67e176BDba17A17691538c1891b2669bF83` |
+| SpaceCoin | `https://goerli.etherscan.io/address/0xD86c4171E01a24D27Aacc5D36897B3D337442b96` |
+| ICO | `https://goerli.etherscan.io/address/0x5a6e6DE454E36C129E7f770B4d3da96920FC4968` |
+| Router | `https://goerli.etherscan.io/address/0x834e9117843C439f86E499E14D5F7B3dc6966089` |
+| Pool | `https://goerli.etherscan.io/address/0x1A73314321f2D0F09e7CEDE3F4BCAceF11d4c231` |
 
 ## Useful Commands
 
