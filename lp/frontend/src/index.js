@@ -8,10 +8,10 @@ import SpaceCoinJSON from '../../artifacts/contracts/SpaceCoin.sol/SpaceCoin.jso
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
 
-const icoAddr = '0x5a6e6DE454E36C129E7f770B4d3da96920FC4968'
-const spaceCoinAddr = '0xD86c4171E01a24D27Aacc5D36897B3D337442b96'
-const spaceLPAddr = '0x1A73314321f2D0F09e7CEDE3F4BCAceF11d4c231'
-const spaceRouterAddr = '0x834e9117843C439f86E499E14D5F7B3dc6966089'
+const icoAddr = '0xcc65591DD12f960CA8480601A762Ed1E12BdF04a'
+const spaceCoinAddr = '0x7fa2F2F8E5A847127871f9B455A5573D8d74d446'
+const spaceLPAddr = '0xaa75e308e125E6b4AaaDF9846c3A2651F42d3be9'
+const spaceRouterAddr = '0xdcc3C5Dd0ebf7B6A824B2e3c7254A235a561D550'
 
 const icoContract = new ethers.Contract(icoAddr, IcoJSON.abi, provider);
 const spaceCoinContract = new ethers.Contract(spaceCoinAddr, SpaceCoinJSON.abi, provider);
