@@ -1,18 +1,49 @@
-import { ethers } from "hardhat";
+import { Logic } from "./../typechain-types/contracts/Logic";
+import hre, { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const [deployer] = await ethers.getSigners();
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const Logic = await ethers.getContractFactory("Logic");
+  const logic = await Logic.deploy();
+  await logic.deployed();
+  console.log("logic deployed to", logic.address);
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const Proxy = await ethers.getContractFactory("Proxy");
+  const proxy = await Proxy.deploy(logic.address);
+  await proxy.deployed();
+  console.log("proxy deployed to", proxy.address);
 
-  await lock.deployed();
+  const LogicImproved = await ethers.getContractFactory("LogicImproved");
+  const logicImproved = await LogicImproved.deploy();
+  await logicImproved.deployed();
+  console.log("logicImproved deployed to", logicImproved.address);
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  const logic1 = Logic.attach(proxy.address) as Logic;
+  const tx = await logic1.initialize(1);
+  await tx.wait();
+
+  // gnosis safe address
+  await logic1
+    .connect(deployer)
+    .transferOwnership("0x1B705ac8177539Fd46f35B47767e6D846690D056");
+
+  await logicImproved.deployTransaction.wait(5);
+
+  await hre.run("verify:verify", {
+    address: logic.address,
+    constructorArguments: [],
+  });
+
+  await hre.run("verify:verify", {
+    address: proxy.address,
+    constructorArguments: [logic.address],
+  });
+
+  await hre.run("verify:verify", {
+    address: logicImproved.address,
+    constructorArguments: [],
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
