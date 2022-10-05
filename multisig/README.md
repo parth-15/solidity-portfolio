@@ -2,7 +2,7 @@
 
 ## Deliverables
 
-My Gnosis Safe can be found here: `FILL_ME_IN`
+My Gnosis Safe can be found here: `https://gnosis-safe.io/app/gor:0x1B705ac8177539Fd46f35B47767e6D846690D056/`
 
 Contracts have been deployed to Goerli at the following addresses:
 
